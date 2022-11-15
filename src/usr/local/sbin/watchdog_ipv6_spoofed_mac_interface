@@ -4,7 +4,7 @@
 
 if [[ "${1}" != "start" && "${1}" != "stop" ]]
 then
-  echo -e "Please call:\n\n\t$(basename ${0}) <start | stop> <device> <host for next hop>\n"
+  echo -e "Please call:\n\n\t$(basename ${0}) <start | stop> <device> <target to ping>\n"
   exit 1
 fi
 
@@ -32,13 +32,15 @@ DEVICE=${2}
 
 NOHUP_PID_FILE="/var/run/$(basename ${0}).${DEVICE}.pid"
 
-# check target address to identify next hop ip
+# check target address
 
 if [[ "${ACTION}" == "start" && "${3}" == "" ]]
 then
-  echo "You have to define an IPv6 target to identify the next hop address"
+  echo "You have to define an IPv6 target to re-open the communication"
   exit 1
 fi
+
+NEXTHOP=${3}
 
 # on any action stop existing watchdog
 
@@ -53,14 +55,6 @@ fi
 
 if [[ "${ACTION}" == "start" ]]
 then
-  NEXTHOP=$(traceroute6 --icmp --sim-queries=1 --queries=1 --wait=1,1,1 -n ${3} 2>/dev/null | head -n 2 | tail -n 1 | sed 's/\(^\s\+\|\s\+$\)//g' | sed 's/\s\s\+/ /g' | cut -d ' ' -f 2)
-
-  if [[ "$?" != "0" || "${NEXTHOP}" == "" ]]
-  then
-    echo "The address ${3} could not be resolved to identify next hop"
-    exit 1
-  fi
-
   nohup bash -c 'while true; do sleep 10; ip -family inet6 neigh flush fe80::1; ping6 -c 5 '${NEXTHOP}'; done' &>/dev/null 2>&1 &
   NOHUP_PID=$!
 
