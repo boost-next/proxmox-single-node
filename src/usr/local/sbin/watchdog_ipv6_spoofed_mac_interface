@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+# check given action
+
+if [[ "${1}" != "start" && "${1}" != "stop" ]]
+then
+  echo -e "Please call:\n\n\t$(basename ${0}) <start | stop> <device> <host for next hop>\n"
+  exit 1
+fi
+
+ACTION=${1}
+
+# check given network device
+
+if [[ "${2}" == "" ]]
+then
+  echo "You have to define a network device for watchdog!"
+  exit 1
+fi
+
+ifconfig ${2} >/dev/null 2>&1
+
+if [[ "$?" != "0" ]]
+then
+  echo "Device ${2} ist not configured!"
+  exit 1
+fi
+
+DEVICE=${2}
+
+# define a pid file
+
+NOHUP_PID_FILE="/var/run/$(basename ${0}).${DEVICE}.pid"
+
+# check target address to identify next hop ip
+
+if [[ "${ACTION}" == "start" && "${3}" == "" ]]
+then
+  echo "You have to define an IPv6 target to identify the next hop address"
+  exit 1
+fi
+
+# on any action stop existing watchdog
+
+LAST_NOHUP_PID=$(cat "${NOHUP_PID_FILE}" 2>/dev/null)
+
+if [[ "${LAST_NOHUP_PID}" != "" ]]
+then
+  kill -9 ${LAST_NOHUP_PID} >/dev/null 2>&1
+fi
+
+# handle action start
+
+if [[ "${ACTION}" == "start" ]]
+then
+  NEXTHOP=$(traceroute6 --icmp --sim-queries=1 --queries=1 --wait=1,1,1 -n ${3} 2>/dev/null | head -n 2 | tail -n 1 | sed 's/\(^\s\+\|\s\+$\)//g' | sed 's/\s\s\+/ /g' | cut -d ' ' -f 2)
+
+  if [[ "$?" != "0" || "${NEXTHOP}" == "" ]]
+  then
+    echo "The address ${3} could not be resolved to identify next hop"
+    exit 1
+  fi
+
+  nohup bash -c 'while true; do sleep 10; ip -family inet6 neigh flush fe80::1; ping6 -c 5 '${NEXTHOP}'; done' &>/dev/null 2>&1 &
+  NOHUP_PID=$!
+
+  if [[ "${NOHUP_PID}" == "" || ${NOHUP_PID} -lt 100 ]]
+  then
+    echo "Failed! Could not start the watchdog!"
+    exit 1
+  fi
+
+  echo -e "$NOHUP_PID\c" > "$NOHUP_PID_FILE"
+fi
+
+exit 0
