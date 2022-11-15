@@ -1,0 +1,98 @@
+# PVE will preserve source directives, but will NOT read its network
+# configuration from sourced files, so do not attempt to move any of
+# the PVE managed interfaces into external files!
+
+
+# ACTIVATE ifaces
+# ----------
+# ATTENTION !!! the auto statements must be specified BEFORE their
+# iface statements. Check that `ipquery -l` will show the correct list
+# of interfaces so that `ifup -a` will bring up the ifaces on boot.
+#
+auto lo
+auto vmbr0
+auto vmbr1
+
+
+# LOOPBACKS
+# ----------
+#
+iface lo inet loopback
+iface lo inet6 loopback
+
+
+# LAN IPv4 - internal network
+# ----------
+# Bind and access the management interface.
+#
+iface vmbr0 inet static
+        # LAN IPv4 address
+        address 192.168.123.1
+        netmask 255.255.255.0
+        gateway 192.168.123.254
+        dns-nameservers 192.168.123.254
+        bridge_ports none
+        bridge_stp off
+        bridge_fd 0
+        bridge-wait 0
+
+
+# Secured Public IPv6 - routed address via OpnSense VM
+# ----------
+# Enable direct access of this PVE Host via IPv6.
+# Firewalled by OpnSense rules based on MASK.
+# ATTENTION - disable `vmbr1 inet6` when using `vmbr0 inet6` 
+#
+iface _vmbr0 inet6 static
+        # Secured public IPv6 routed address
+        address A:B:C:D:666::1
+        netmask 64
+        gateway A:B:C:D:888::254
+
+
+# WAN NIC
+# ----------
+# The default ether of the physical NIC is melted / dongled
+# to the provider switch. For bridge mode, the NIC will gets
+# a generated MAC address. The physical MAC address can be
+# used in the OpnSense firewall VM.
+#
+iface eno1 inet manual
+        # Physical NIC
+        pre-up ip link set dev eno1 address 00:00:00:00:00:00
+
+
+# WAN bridge
+# ----------
+# This interface belongs to the OpnSense Firewall VM ONLY!
+#
+iface vmbr1 inet manual
+        # WAN bridge physical interface
+        bridge-ports eno1
+        bridge-stp off
+        bridge-fd 0
+        bridge-wait 0
+
+
+# WAN IPv6 RESCUE
+# ----------
+# Should be ONLY ENABLED for RESCUE or INSTALLATION.
+# Local firewall rules to accept ICMPv6 and SSH only.
+# ATTENTION - disable `vmbr0 inet6` when using `vmbr1 inet6` 
+#
+iface _vmbr1 inet6 static
+        # WAN IPv6 rescue address
+        address A:B:C:D::1
+        netmask 64
+        gateway fe80::1
+        pre-up ip6tables -F
+        pre-up ip6tables -X
+        pre-up ip6tables -A INPUT -i vmbr1 -p ipv6-icmp -j ACCEPT
+        pre-up ip6tables -A INPUT -i vmbr1 -p tcp --dport 22 -j ACCEPT
+        pre-up ip6tables -A INPUT -i vmbr1 -j DROP
+        post-up /usr/local/sbin/watchdog_ipv6_spoofed_mac_interface start vmbr1 2001:4860:4860::8888
+
+
+# use additional configuration
+#
+source /etc/network/interfaces.d/*
