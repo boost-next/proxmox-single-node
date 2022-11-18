@@ -181,5 +181,50 @@ pve -> System -> Time -> Time zone
 
 
 
+## Create CT on btrfs
+
+```bash
+# create container from template
+pct create <ID {120-199}> local:vztmpl/debian-11-standard_11.3-1_amd64.tar.zst --rootfs pve:0 --password --ostype debian --hostname <HOSTNAME> --feature nesting=1 --cores <CORES> --memory <MEMORY> --swap 0 --timezone host --unprivileged 1
+
+# append data store for file-store, db-store etc.
+pct set <ID> --mp0 volume=data:0,mp=/var/data
+
+# append network interface
+pct set <ID> --net0 name=eth0,bridge=vmbr0,firewall=0,ip=10.101.66.254.1.<ID-100>/25,gw=10.101.66.1
+
+# allow access of CT to BTRFS
+chmod +rx /vol/pve/images/<ID>/subvol-<ID>-disk-0.subvol
+chmod +rx /vol/data/images/<ID>/subvol-<ID>-disk-0.subvol
+```
+
+## Activate compression on BTRFS folders (and sub-folders)
+
+```bash
+# in CT <ID> create the folder
+mkdir -p /var/data/compressed-store
+# after activating compression, possible to test inside CT
+lsattr -d /ar/data/compressed-store
+```
+
+```bash
+# in HOST activae and check compression state
+btrfs property set /vol/data/images/<ID>/subvol-<ID>-disk-0.subvol/compressed-store compression zstd
+# check state
+btrfs property get /vol/data/images/<ID>/subvol-<ID>-disk-0.subvol/compressed-store
+# check folder attribute
+lsattr -d /vol/data/images/<ID>/subvol-<ID>-disk-0.subvol/compressed-store
+```
+
+### usefull commands on HOST to check compression rates
+
+```bash
+# install tools - only once
+apt install btrfs-compsize
+# check compression rate
+compsize /vol/data/images/<ID>/subvol-<ID>-disk-0.subvol/compressed-store/
+```
+
+
 
 
