@@ -165,7 +165,7 @@ reboot
 
 
 pvesm add btrfs pve --path /vol/pve
-pvesm set pve --format subvol
+pvesm set pve --format raw # until subvol for btrfs is official supported
 
 pvesm add btrfs data --path /vol/data
 pvesm set data --format subvol
@@ -191,7 +191,7 @@ pct create <ID {120-199}> local:vztmpl/debian-11-standard_11.3-1_amd64.tar.zst -
 pct set <ID> --mp0 volume=data:0,mp=/var/data
 
 # append network interface
-pct set <ID> --net0 name=eth0,bridge=vmbr0,firewall=0,ip=10.101.66.254.1.<ID-100>/25,gw=10.101.66.1
+pct set <ID> --net0 name=eth0,bridge=vmbr0,firewall=0,ip=10.101.66.254.1.<ID-100>/25,gw=10.101.66.1,ip6=2001:db8:0:0:666::<ID-100>/80,gw6=2001:db8:0:0:666::9
 
 # allow access of CT to BTRFS
 chmod +rx /vol/pve/images/<ID>/subvol-<ID>-disk-0.subvol
