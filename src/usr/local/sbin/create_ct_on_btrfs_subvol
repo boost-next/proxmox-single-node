@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+# check given action
+#
+# sample:
+#
+# system with ipv4
+# create_ct_on_btrfs_subvol 555 debian-11-standard_11.3-1_amd64.tar.zst hostname 2 8192 1.2.3.4/24 1.2.3.1 - - -
+#
+# system with ipv4 and data volume
+# create_ct_on_btrfs_subvol 555 debian-11-standard_11.3-1_amd64.tar.zst hostname 2 8192 1.2.3.4/24 1.2.3.1 - - data
+#
+# a dash "-" will ignore the param
+#
+
+CT_ID=$1
+CT_TEMPL=$2
+CT_HOSTNAME=$3
+CT_CORES=$4
+CT_MEMORY=$5
+
+CT_IPV4=$6
+CT_IPV4_GW=$7
+
+CT_IPV6=$8
+CT_IPV6_GW=$9
+
+shift
+CT_DATA=$9
+
+# test given params before create CT
+__check_param () {
+
+  if [[ "${1}" == "" ]]
+  then
+    echo "${2} to create CT is missing!"
+    exit 1
+  fi
+
+}
+
+__check_param "${CT_ID}" "ID"
+__check_param "${CT_TEMPL}" "Template"
+__check_param "${CT_HOSTNAME}" "Hostname"
+__check_param "${CT_CORES}" "Cores"
+__check_param "${CT_MEMORY}" "Memory"
+__check_param "${CT_IPV4}" "IPv4 address/CIDR"
+__check_param "${CT_IPV4_GW}" "IPv4 Gateway"
+__check_param "${CT_IPV6}" "IPv6 address/PFX"
+__check_param "${CT_IPV6_GW}" "IPv6 Gateway"
+__check_param "${CT_DATA}" "Data volume"
+
+# create container from template
+pct create "${CT_ID}" local:vztmpl/${CT_TEMPL} --rootfs pve:0 --password --ostype debian --hostname "${CT_HOSTNAME}" --feature nesting=1 --cores ${CT_CORES} --memory "${CT_MEMORY}" --swap 0 --timezone host --unprivileged 1
+
+  # allow access of CT to BTRFS
+  chmod +rx "/vol/pve/images/${CT_ID}/subvol-${CT_ID}-disk-0.subvol"
+
+# append network interface
+if [[ "${CT_IPV4}" != "-" && "${CT_IPV6}" != "-" ]]
+then
+  pct set "${CT_ID}" --net0 name=eth0,bridge=vmbr0,firewall=0,ip="${CT_IPV4}",gw="${CT_IPV4_GW}",ip6="${CT_IPV6}",gw6="${CT_IPV6_GW}"
+fi
+if [[ "${CT_IPV4}" != "-" && "${CT_IPV6}" == "-" ]]
+then
+  pct set "${CT_ID}" --net0 name=eth0,bridge=vmbr0,firewall=0,ip="${CT_IPV4}",gw="${CT_IPV4_GW}"
+fi
+if [[ "${CT_IPV4}" == "-" && "${CT_IPV6}" != "-" ]]
+then
+  pct set "${CT_ID}" --net0 name=eth0,bridge=vmbr0,firewall=0,ip6="${CT_IPV6}",gw6="${CT_IPV6_GW}"
+fi
+
+# append data store for file-store, db-store etc.
+if [[ "${CT_DATA}" != "-" ]]
+then
+  pct set "${CT_ID}" --mp0 volume=data:0,mp=/vol/data
+  # allow access of CT to BTRFS
+  chmod +rx "/vol/data/images/${CT_ID}/subvol-${CT_ID}-disk-0.subvol"
+fi
+
+echo "CT ${CT_ID} created"
+
+exit 0
