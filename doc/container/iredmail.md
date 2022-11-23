@@ -6,6 +6,17 @@ Setup DNS for A, PTR, MX, SPF, DKIM, DMARC https://docs.iredmail.org/setup.dns.h
 
 Performance and Tuning: https://docs.iredmail.org/performance.tuning.html
 
+Check banned ips: https://docs.iredmail.org/fail2ban.sql.html
+
+```sql
+use fail2ban;
+select * from banned;
+update banned set remove=1 where ...;
+delete from banned;
+```
+
+Disable service for testing purposes: `systemctl stop fail2ban`
+
 Autodiscover from iRedMail Easy: https://docs.iredmail.org/iredmail-easy.autoconfig.autodiscover.html
 
 not available in iRedMail (Free)
