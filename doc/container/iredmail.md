@@ -34,3 +34,7 @@ INSERT INTO alias (address, domain, active) VALUES ('user@domain.tld', 'domain.t
 INSERT INTO forwardings (address, forwarding, domain, dest_domain, is_list, active) VALUES ('user@from.tld', 'user@receipt.tld', 'from.tld', 'receipt.tld', 0, 1);
 ```
 
+Customization Frontend Webmailer: https://docs.iredmail.org/webmail.customization.html
+
+Customize SOGo HTML Frontend: https://www.sogo.nu/support/faq/how-to-customize-the-html.html
+
