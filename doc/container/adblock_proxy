@@ -1,0 +1,18 @@
+Use Ad Guard Home
+
+https://github.com/AdguardTeam/AdGuardHome#how-does-adguard-home-compare-to-pi-hole
+
+Put it on OpnSense https://www.youtube.com/watch?v=82W8ERHZOO0
+
+Use IOS DNSCloak or DNSOverride
+
+Use DNS over HTTPS, checkout for authorization
+
+https://labzilla.io/blog/adguard-dns-over-https
+
+https://github.com/AdguardTeam/AdGuardHome/issues/3696
+
+https://www.google.com/search?q=adguard+home+private+dns+android&ei=gBV-Y43KJqeA9u8P-rW84AU&ved=0ahUKEwiNiuicqsT7AhUngP0HHfoaD1wQ4dUDCA8&uact=5&oq=adguard+home+private+dns+android&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQAzIHCAAQgAQQEzoKCAAQRxDWBBCwAzoFCAAQgAQ6BggAEBYQHjoICAAQFhAeEBM6CggAEBYQHhAKEBM6CQgAEIAEEA0QE0oECEEYAEoECEYYAFDXEVivOWC3PWgBcAF4AIABWYgB2w-SAQIyOZgBAKABAcgBCMABAQ&sclient=gws-wiz-serp
+
+MITMPROXY https://docs.mitmproxy.org/stable/concepts-modes/
+
