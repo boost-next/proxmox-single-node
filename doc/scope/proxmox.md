@@ -32,7 +32,11 @@ rm -rf /var/log/pve-firewall.log.* /var/log/pveam.log.* /var/log/pveproxy/access
 ### rename proxmox node
 
 ```bash
-# shutdown services
+# stop vms
+pct stop ...
+qm stop ...
+
+# shutdown proxmox services
 
 # change names
 vi /etc/hosts
