@@ -28,3 +28,25 @@ rm -rf /var/lib/rrdcached/journal/rrd.* /var/lib/rrdcached/db/pve2-*/*
 ```bash
 rm -rf /var/log/pve-firewall.log.* /var/log/pveam.log.* /var/log/pveproxy/access.log.* ; find /var/log/pve/tasks -type f -exec rm "{}" \; ; > /var/log/pve-firewall.log ; > /var/log/pveam.log ; > /var/log/pveproxy/access.log
 ```
+
+### rename proxmox node
+
+```bash
+# shutdown services
+
+# change names
+vi /etc/hosts
+vi /etc/hostname
+cp -p /etc/hostname /etc/mailname
+vi /etc/postfix/main.cf
+
+# move configurations
+cd /etc/pve/nodes/
+mkdir -p new_name/qemu-server
+mv old_name/qemu-server/* new_name/qemu-server/
+rm -rf old_name
+
+# clean all rrd data
+
+# reboot
+```
