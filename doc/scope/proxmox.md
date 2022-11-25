@@ -48,6 +48,9 @@ vi /etc/postfix/main.cf
 cd /etc/pve/nodes/
 mkdir -p new_name/qemu-server
 mv old_name/qemu-server/* new_name/qemu-server/
+mkdir -p new_name/lxc
+mv old_name/lxc/* new_name/lxc/
+mv old_name/host.fw new_name/
 rm -rf old_name
 
 # clean all rrd data
