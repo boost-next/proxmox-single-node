@@ -13,9 +13,17 @@ How to monitor Proxmox with InfluxDB and Grafana: https://tcude.net/monitoring-p
 Use OpnSense with Telefgraf plugin: https://www.thomas-krenn.com/de/wiki/OPNsense_Telegraf_Plugin_Installation_und_Konfiguration
 
 
+**Attention**
 
+Create the setup of influxdb from the console via `influx setup` will store the `master admin token` directly into the user`s created folder `.influxdbv2/config`. The cli tool `influx` will be run directly afterwards with full access rights. Maybe do it as user `root` or create an operator user.
 
+Doing the setup from the Web GUI, will not allow to show the `master admin token` anywhere. But root can use the `influxd` (!!! not `influx`) cli tool on InfluxDB server to read the token from installation directly out of the bolt database file.
 
+Use:
+
+```bash
+influxd recovery auth list --bolt-path /var/lib/influxdb/influxd.bolt
+```
 
 
 ## Appendix
