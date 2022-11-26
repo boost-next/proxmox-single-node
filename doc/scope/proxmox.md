@@ -4,11 +4,8 @@ But make sure to re-run service anabling afterwards
 
 ```bash
 apt purge ifupdown
-systemctl enable networking
-# or does the same
-apt install --reinstall ifupdown2
+dpkg-reconfigure ifupdown2
 ```
-
 
 
 ## stop all proxmox service except cluser for /etc/pve mount
