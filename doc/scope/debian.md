@@ -5,6 +5,7 @@ apt update
 apt dist-upgrade
 apt install curl zip unzip net-tools gnupg2 ifupdown2
 apt purge ifupdown
+dpkg-reconfigure ifupdown2
 apt autoremove --purge
 ```
 
