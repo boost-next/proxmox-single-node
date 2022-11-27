@@ -209,7 +209,7 @@ lsattr -d /ar/data/compressed-store
 
 ```bash
 # in HOST activae and check compression state
-btrfs property set /vol/data/images/<ID>/subvol-<ID>-disk-0.subvol/compressed-store compression zstd
+btrfs property set /vol/data/images/<ID>/subvol-<ID>-disk-0.subvol/compressed-store compression zstd,1
 # check state
 btrfs property get /vol/data/images/<ID>/subvol-<ID>-disk-0.subvol/compressed-store
 # check folder attribute
@@ -225,6 +225,22 @@ apt install btrfs-compsize
 compsize /vol/data/images/<ID>/subvol-<ID>-disk-0.subvol/compressed-store/
 ```
 
+Check compression ratio and speed from: https://git.kernel.org/pub/scm/linux/kernel/git/mason/linux-btrfs.git/commit/?h=next&id=5c1aab1dd5445ed8bdcdbb575abc1b0d7ee5b2e7
 
+In case of the given list, (zstd,1) with ratio 2.57 is best in speed and compression otherwise speed slows down too much.
+
+```
+| Method  | Ratio | Compression MB/s | Decompression speed |
+|---------|-------|------------------|---------------------|
+| None    |  0.99 |              504 |                 686 |
+| lzo     |  1.66 |              398 |                 442 |
+| zlib    |  2.58 |               65 |                 241 |
+| zstd 1  |  2.57 |              260 |                 383 |
+| zstd 3  |  2.71 |              174 |                 408 |
+| zstd 6  |  2.87 |               70 |                 398 |
+| zstd 9  |  2.92 |               43 |                 406 |
+| zstd 12 |  2.93 |               21 |                 408 |
+| zstd 15 |  3.01 |               11 |                 354 |
+```
 
 
