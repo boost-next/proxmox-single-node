@@ -1,17 +1,9 @@
 #!/usr/bin/env bash
 
+# save some values
+APP=$(basename "$0")
+
 # check given action
-#
-# sample:
-#
-# system with ipv4
-# create_ct_on_btrfs_subvol 555 debian-11-standard_11.3-1_amd64.tar.zst hostname 2 8192 1.2.3.4/24 1.2.3.1 - - -
-#
-# system with ipv4 and data volume
-# create_ct_on_btrfs_subvol 555 debian-11-standard_11.3-1_amd64.tar.zst hostname 2 8192 1.2.3.4/24 1.2.3.1 - - data
-#
-# a dash "-" will ignore the param
-#
 
 CT_ID=$1
 CT_TEMPL=$2
@@ -28,12 +20,38 @@ CT_IPV6_GW=$9
 shift
 CT_DATA=$9
 
+# simple help output
+__help () {
+
+  echo -e "Usage:\n"
+  echo -e "${APP} ID TEMPLATE HOSTNAME CORES MEM_MB IPV4/CIDR GW_V4 IPV6/PFX GW_V6 DATA_VOL\n"
+  echo -e "  * IPV4, IPV6 and DATA_VOL params could be entered as dash (-) and will be ignored on config\n"
+
+  TEMPLATES=$( ls /var/lib/vz/template/cache/ )
+  echo -e "  * Templates:"
+  for t in ${TEMPLATES}; do echo "    - $t"; done
+  echo
+
+  IP_ADDRS=$( ip a s vmbr0 scope global | grep 'inet' | sed 's/\s\+/ /g' | cut -d ' ' -f 3 )
+  echo -e "  * Host addresses IPv4, IPv6:"
+  for t in ${IP_ADDRS}; do echo "    - $t"; done
+  echo
+
+}
+
+if [[ "${CT_ID}" == "--help" || "${CT_ID}" == "-h" || "${CT_ID}" == "" ]]
+then
+  __help
+  exit 0
+fi
+
 # test given params before create CT
 __check_param () {
 
   if [[ "${1}" == "" ]]
   then
-    echo "${2} to create CT is missing!"
+    echo -e "${2} to create CT is missing!\n"
+    __help
     exit 1
   fi
 
