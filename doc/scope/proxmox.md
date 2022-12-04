@@ -11,7 +11,7 @@ dpkg-reconfigure ifupdown2
 ## stop all proxmox service except cluser for /etc/pve mount
 
 ```bash
-systemctl stop pvebanner.service pveproxy.service pvefw-logger.service pve-firewall.service pve-ha-lrm.service pve-ha-crm.service pvestatd.service pve-daily-update.timer pvenetcommit.service pvescheduler.service pve-storage.target
+systemctl stop pvebanner.service pveproxy.service pvefw-logger.service pve-firewall.service pve-ha-lrm.service pve-ha-crm.service pvestatd.service pve-daily-update.timer pvenetcommit.service pvescheduler.service pve-storage.target pve-lxc-syscalld.service
 ```
 
 ### clean all rrd data
@@ -43,11 +43,15 @@ vi /etc/postfix/main.cf
 
 # move configurations
 cd /etc/pve/nodes/
-mkdir -p new_name/qemu-server
-mv old_name/qemu-server/* new_name/qemu-server/
+
 mkdir -p new_name/lxc
+mkdir -p new_name/qemu-server
+
 mv old_name/lxc/* new_name/lxc/
+mv old_name/qemu-server/* new_name/qemu-server/
+
 mv old_name/host.fw new_name/
+
 rm -rf old_name
 
 # clean all rrd data
