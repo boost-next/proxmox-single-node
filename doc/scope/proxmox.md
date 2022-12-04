@@ -7,6 +7,13 @@ apt purge ifupdown
 dpkg-reconfigure ifupdown2
 ```
 
+### stop all running nodes
+
+```bash
+# stop vms
+pct stop ...
+qm stop ...
+```
 
 ## stop all proxmox service except cluser for /etc/pve mount
 
@@ -29,13 +36,7 @@ rm -rf /var/log/pve-firewall.log.* /var/log/pveam.log.* /var/log/pveproxy/access
 ### rename proxmox node
 
 ```bash
-# stop vms
-pct stop ...
-qm stop ...
-
-# shutdown proxmox services
-
-# change names
+# edit some system files and change hostname
 vi /etc/hosts
 vi /etc/hostname
 cp -p /etc/hostname /etc/mailname
@@ -54,7 +55,10 @@ mv old_name/host.fw new_name/
 
 rm -rf old_name
 
-# clean all rrd data
+# edit some other configurations and change host name
+cd /etc/pve
+vi storage.cfg
 
 # reboot
+reboot
 ```
