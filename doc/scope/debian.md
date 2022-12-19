@@ -9,3 +9,8 @@ dpkg-reconfigure ifupdown2
 apt autoremove --purge
 ```
 
+system needs reboot afterwards
+
+```bash
+reboot
+```
