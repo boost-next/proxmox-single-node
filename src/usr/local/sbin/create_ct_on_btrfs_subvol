@@ -5,20 +5,32 @@ APP=$(basename "$0")
 
 # check given action
 
-CT_ID=$1
-CT_TEMPL=$2
-CT_HOSTNAME=$3
-CT_CORES=$4
-CT_MEMORY=$5
+CT_ID=$1 && shift
+CT_TEMPL=$1 && shift
+CT_HOSTNAME=$1 && shift
+CT_CORES=$1 && shift
+CT_MEMORY=$1 && shift
 
-CT_IPV4=$6
-CT_IPV4_GW=$7
+CT_IPV4=$1 && shift
+CT_IPV4_GW=$1 && shift
 
-CT_IPV6=$8
-CT_IPV6_GW=$9
+CT_IPV6=$1 && shift
+CT_IPV6_GW=$1 && shift
 
-shift
-CT_DATA=$9
+CT_DATA=$1 && shift
+
+FLAG_UNPRIVILEGED=1
+
+while [[ "$1" != "" ]]
+do
+  PARAM=$1
+  case "${PARAM}" in
+    --privileged)
+      FLAG_UNPRIVILEGED=0
+      ;;
+  esac
+  shift
+done
 
 # simple help output
 __help () {
@@ -69,7 +81,7 @@ __check_param "${CT_IPV6_GW}" "IPv6 Gateway"
 __check_param "${CT_DATA}" "Data volume"
 
 # create container from template
-pct create "${CT_ID}" local:vztmpl/${CT_TEMPL} --rootfs pve:0 --password --ostype debian --hostname "${CT_HOSTNAME}" --feature nesting=1 --cores ${CT_CORES} --memory "${CT_MEMORY}" --swap 0 --timezone host --unprivileged 1
+pct create "${CT_ID}" local:vztmpl/${CT_TEMPL} --rootfs pve:0 --password --ostype debian --hostname "${CT_HOSTNAME}" --feature nesting=1 --cores ${CT_CORES} --memory "${CT_MEMORY}" --swap 0 --timezone host --unprivileged ${FLAG_UNPRIVILEGED}
 
   # allow access of CT to BTRFS
   chmod +rx "/vol/pve/images/${CT_ID}/subvol-${CT_ID}-disk-0.subvol"
