@@ -4,7 +4,11 @@ installimage
 
 use (unsupported) proxmox buster template
 
-define settings for installationapt install 
+define settings for installation
+
+```bash
+
+apt install 
 
 reboot
 
@@ -170,6 +174,7 @@ pvesm set pve --format raw # until subvol for btrfs is official supported
 pvesm add btrfs data --path /vol/data
 pvesm set data --format subvol
 
+```
 
 Web config
 
