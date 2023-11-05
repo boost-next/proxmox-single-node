@@ -1,0 +1,27 @@
+--- /usr/share/perl5/PVE/LXC.pm 2023-06-24 15:08:37.000000000 +0200
++++ /usr/share/perl5/PVE/LXC.pm 2023-11-02 19:13:10.820735410 +0100
+@@ -1793,6 +1793,24 @@
+                    $name .= "\@$snapname";
+                    if ($scfg->{type} eq 'zfspool') {
+                        PVE::Tools::run_command(['mount', '-o', 'ro', @extra_opts, '-t', 'zfs', "$scfg->{pool}/$name", $mount_path]);
++                   } elsif ($scfg->{type} eq 'btrfs') {
++                       # extract subvol path for snapshot
++                       my $snap_subvol_path = $path =~ s/$scfg->{path}\///r;
++
++                       # parse result from btrfs for device uuid
++                       my $device_uuid;
++
++                       my $parser = sub {
++                           my $line = shift;
++                           if ($line =~ m/^.*\s+uuid:\s+([0-9a-f-]+)(\s+.*)?$/) {
++                               $device_uuid = $1;
++                           }
++                       };
++
++                       # get uuid for block device from btrfs volume
++                       PVE::Tools::run_command(['btrfs', 'filesystem', 'show', '-m', $scfg->{path}], outfunc => $parser, timeout => 10);
++
++                       PVE::Tools::run_command(['mount', '-o', 'ro', @extra_opts, '-t', 'btrfs', '-o', "subvol=$snap_subvol_path", "UUID=$device_uuid", $mount_path]);
+                    } else {
+                        die "cannot mount subvol snapshots for storage type '$scfg->{type}'\n";
+                    }
