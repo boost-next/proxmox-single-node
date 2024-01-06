@@ -62,3 +62,10 @@ vi storage.cfg
 # reboot
 reboot
 ```
+
+### apply LXC.pm patch for btrfs
+
+```bash
+# apply patch ignoring whitespace changes
+patch -l /usr/share/perl5/PVE/LXC.pm <LXC.pm.patch
+```
